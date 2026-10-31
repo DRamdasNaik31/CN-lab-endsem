@@ -1,0 +1,57 @@
+2. Run the simulation
+Open the UnetStack terminal and run:
+bin/unet Q1_Communication_Range.groovy
+
+
+The simulation will start and display the node connection addresses.
+3. Test connectivity for the first placement
+Open the shell for Node 1 using its web interface, then execute:
+ping 2
+ping 3
+
+
+Open the shell for Node 2:
+ping 3
+
+
+Use the ping command in the UnetStack shell. The tests are between:
+- Node 1 and Node 2: 1200 m
+- Node 2 and Node 3: 1200 m
+- Node 1 and Node 3: 2400 m
+4. Expected results — first placement
+Pair	Distance	Reachable?
+1–2	    1200 m	    Yes
+2–3	    1200 m	    Yes
+1–3	    2400 m	    No
+
+Why? The communication range is 1500 m. The 1–3 pair is outside that range.
+5. Move Node 3 to 1800 m
+Stop the first simulation using Ctrl+C.
+
+Open the same Groovy file and change Node 3's location:
+location: [1800.m, 0.m, 0.m],
+
+
+Save the file and run the simulation again:
+bin/unet Q1_Communication_Range.groovy
+
+
+Now open Node 1's shell and execute:
+ping 3
+
+
+6. Expected results — second placement
+Pair	Distance	Reachable?
+1–3	    1800 m	    No
+
+Even though 1800 m is within the detection range of 2000 m, it exceeds the communication range of 1500 m. Therefore, successful ping communication is not expected. 
+UnetStack Handbook+1
+
+7. Final connectivity table
+Pair	First   placement	Second placement
+1–2	    Yes 	Yes
+2–3	    Yes	    Yes
+1–3	    No	    No
+
+Practical complete
+Important: The script creates the topology and sets the channel model. The ping commands are executed separately in the node shells. Save the ping outputs from both runs for your practical observation.

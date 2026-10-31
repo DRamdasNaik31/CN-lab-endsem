@@ -1,0 +1,388 @@
+Question 2: VLAN and Inter-VLAN Routing
+Part 1: Create the network topology
+Step 1. Open Cisco Packet Tracer.
+
+Step 2. Add the following devices:
+Device	Model	Quantity
+Router	1941	1
+Switch	2960	1
+PCs	    PC-PT	6
+
+Step 3. Arrange the devices:
+- Router R1 at the top.
+- Switch SW1 below the router.
+- Six PCs below the switch.
+- Group PC1 and PC2 under Admin.
+- Group PC3 and PC4 under Faculty.
+- Group PC5 and PC6 under Students.
+Step 4. Rename the devices.
+
+Use the Config → Display Name option.
+- Router0 → R1
+- Switch0 → SW1
+- PC0 → PC1
+- PC1 → PC2
+- PC2 → PC3
+- PC3 → PC4
+- PC4 → PC5
+- PC5 → PC6
+
+Part 2: Connect the devices
+Step 5. Select Connections (lightning symbol).
+
+Step 6. Select Copper Straight-Through.
+
+Connect the following:
+From	Port	To	Port
+R1	    G0/0	SW1	Fa0/1
+SW1	    Fa0/2	PC1	Fa0
+SW1	    Fa0/3	PC2	Fa0
+SW1	    Fa0/4	PC3	Fa0
+SW1	    Fa0/5	PC4	Fa0
+SW1	    Fa0/6	PC5	Fa0
+SW1	    Fa0/7	PC6	Fa0
+
+Step 7. Wait until the link indicators turn green.
+Part 3: Create VLANs on the switch
+Step 8. Click SW1 → CLI.
+
+Step 9. Press Enter.
+
+Step 10. Enter the following commands:
+enable
+configure terminal
+
+
+Step 11. Create VLAN 10 (Admin).
+vlan 10
+name Admin
+exit
+
+
+Step 12. Create VLAN 20 (Faculty).
+vlan 20
+name Faculty
+exit
+
+
+Step 13. Create VLAN 30 (Students).
+vlan 30
+name Students
+exit
+
+
+Step 14. Verify VLAN creation.
+do show vlan brief
+
+
+You should see:
+VLAN	Name
+10	    Admin
+20	    Faculty
+30	    Students
+
+Part 4: Assign switch ports to VLANs
+Our port allocation:
+VLAN	Department	Switch ports
+10	    Admin	    Fa0/2, Fa0/3
+20	    Faculty	    Fa0/4, Fa0/5
+30	    Students	Fa0/6, Fa0/7
+
+Step 15. Assign ports to VLAN 10.
+
+On the switch CLI:
+interface range fa0/2-3
+switchport mode access
+switchport access vlan 10
+exit
+
+
+Step 16. Assign ports to VLAN 20.
+interface range fa0/4-5
+switchport mode access
+switchport access vlan 20
+exit
+
+
+Step 17. Assign ports to VLAN 30.
+interface range fa0/6-7
+switchport mode access
+switchport access vlan 30
+exit
+
+
+Step 18. Verify port assignments.
+do show vlan brief
+
+
+Expected:
+- VLAN 10 → Fa0/2, Fa0/3
+- VLAN 20 → Fa0/4, Fa0/5
+- VLAN 30 → Fa0/6, Fa0/7
+
+Part 5: Configure trunk between switch and router
+Step 19. Configure Fa0/1 as a trunk port.
+interface fa0/1
+switchport mode trunk
+exit
+
+
+Step 20. Verify trunk configuration.
+do show interfaces trunk
+
+
+You should see Fa0/1 operating in trunk mode.
+
+Step 21. Save the switch configuration.
+end
+write memory
+
+Switch VLANs and trunk configured
+
+
+Part 6: Configure Router-on-a-Stick
+Now we'll configure three subinterfaces on the router.
+
+Step 22. Click R1 → CLI.
+
+Step 23. Press Enter.
+
+Step 24. Enter:
+enable
+configure terminal
+
+
+Step 25. Enter the physical interface.
+interface gigabitEthernet 0/0
+no shutdown
+exit
+
+
+Step 26. Configure VLAN 10 subinterface.
+interface gigabitEthernet 0/0.10
+encapsulation dot1Q 10
+ip address 192.168.10.1 255.255.255.0
+exit
+
+
+Step 27. Configure VLAN 20 subinterface.
+interface gigabitEthernet 0/0.20
+encapsulation dot1Q 20
+ip address 192.168.20.1 255.255.255.0
+exit
+
+
+Step 28. Configure VLAN 30 subinterface.
+interface gigabitEthernet 0/0.30
+encapsulation dot1Q 30
+ip address 192.168.30.1 255.255.255.0
+exit
+
+
+Step 29. Verify router configuration.
+end
+show ip interface brief
+
+
+Expected:
+Interface	IP address
+G0/0.10	    192.168.10.1
+G0/0.20	    192.168.20.1
+G0/0.30	    192.168.30.1
+
+All three subinterfaces should become up/up once the physical link and trunk are operational.
+Router-on-a-Stick configured
+
+
+Part 7: Assign IP addresses to all PCs
+Use the following addressing table.
+PC	    Department	IP address	    Gateway
+PC1	    Admin	    192.168.10.10	192.168.10.1
+PC2	    Admin	    192.168.10.11	192.168.10.1
+PC3	    Faculty	    192.168.20.10	192.168.20.1
+PC4	    Faculty	    192.168.20.11	192.168.20.1
+PC5	    Students	192.168.30.10	192.168.30.1
+PC6	    Students	192.168.30.11	192.168.30.1
+
+Subnet mask for all PCs:
+
+255.255.255.0
+Configure PC1
+Step 30. Click PC1.
+
+Step 31. Open Desktop → IP Configuration.
+
+Step 32. Select Static.
+
+Step 33. Enter:
+IP Address:       192.168.10.10
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.10.1
+
+
+Configure PC2
+Step 34. Click PC2 → Desktop → IP Configuration.
+IP Address:       192.168.10.11
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.10.1
+
+
+Configure PC3
+Step 35. Click PC3 → Desktop → IP Configuration.
+IP Address:       192.168.20.10
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.20.1
+
+
+Configure PC4
+Step 36. Click PC4 → Desktop → IP Configuration.
+IP Address:       192.168.20.11
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.20.1
+
+
+Configure PC5
+Step 37. Click PC5 → Desktop → IP Configuration.
+IP Address:       192.168.30.10
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.30.1
+
+
+Configure PC6
+Step 38. Click PC6 → Desktop → IP Configuration.
+IP Address:       192.168.30.11
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.30.1
+
+All six PCs configured
+
+Part 8: Test inter-VLAN communication BEFORE ACL
+Important: Perform these tests before applying the ACL.
+
+Step 39. Test PC1 → PC3.
+
+Click PC1 → Desktop → Command Prompt.
+ping 192.168.20.10
+
+
+Step 40. Test PC1 → PC5.
+ping 192.168.30.10
+
+
+Step 41. Test PC3 → PC5.
+ping 192.168.30.10
+
+
+Step 42. Test PC5 → PC1.
+ping 192.168.10.10
+
+
+Step 43. Test communication within the same VLAN.
+
+From PC1:
+ping 192.168.10.11
+
+
+From PC3:
+ping 192.168.20.11
+
+
+From PC5:
+ping 192.168.30.11
+
+All communication should work before ACL
+If the first ping fails, repeat it after ARP resolution.
+
+
+Part 9: Configure ACL to block Students from Admin
+Now comes the important part.
+
+Requirement:
+- Students must NOT access Admin.
+- Students CAN access Faculty.
+- Faculty CAN access Admin.
+- Admin CAN access Faculty and Students.
+We'll use an Extended ACL.
+
+Step 44. Click R1 → CLI.
+
+Step 45. Enter:
+enable
+configure terminal
+
+
+Step 46. Create an extended ACL.
+access-list 100 deny ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+
+
+Step 47. Permit all other traffic.
+access-list 100 permit ip any any
+
+
+Step 48. Apply the ACL to the Students subinterface.
+interface gigabitEthernet 0/0.30
+ip access-group 100 in
+exit
+
+
+Step 49. Exit configuration mode.
+end
+
+
+Step 50. Verify ACL configuration.
+show access-lists
+
+
+You should see:
+Extended IP access list 100
+    deny ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+    permit ip any any
+
+
+Step 51. Verify ACL application.
+show ip interface gigabitEthernet 0/0.30
+
+
+Check that access list 100 is applied to inbound traffic.
+ACL configured
+
+
+Part 10: Test ACL restrictions
+Now we need to demonstrate that Students cannot access Admin.
+Test 1: Students → Admin
+Step 52. Click PC5 → Desktop → Command Prompt.
+
+Enter:
+ping 192.168.10.10
+
+Expected: Request timed out
+
+Step 53. Test another Admin PC.
+ping 192.168.10.11
+
+
+Expected: Request timed out.
+Test 2: Students → Faculty
+Step 54. From PC5:
+ping 192.168.20.10
+
+
+Expected: Successful replies.
+Test 3: Faculty → Admin
+Step 55. From PC3:
+ping 192.168.10.10
+
+
+Expected: Successful replies.
+Test 4: Admin → Students
+Step 56. From PC1:
+ping 192.168.30.10
+
+
+Expected: Successful replies.
+Test 5: Verify ACL counters
+Step 57. Open R1 → CLI.
+show access-lists
+
+
+Check the match counters. The deny entry should show matches after the blocked traffic tests.

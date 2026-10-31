@@ -1,0 +1,122 @@
+2. Start the simulation
+From the UnetStack installation directory:
+bin/unet Q2_Raw_Frame_PHY.groovy
+
+
+Wait for both nodes to start.
+3. Subscribe to PHY notifications at Node B
+Open the web interface for Node B:
+http://localhost:8082
+
+
+Open its shell and type:
+subscribe phy
+
+Keep this shell open. It should display received PHY notifications.
+
+
+4. Inspect CONTROL and DATA channel parameters at Node A
+Open Node A:
+http://localhost:8081
+
+
+In its shell, type:
+phy[CONTROL]
+
+Record these two values:
+phy[CONTROL].frameLength
+phy[CONTROL].dataRate
+
+
+Now inspect the DATA channel:
+phy[DATA]
+phy[DATA].frameLength
+phy[DATA].dataRate
+
+These values depend on the modem/simulator configuration, so record the actual values displayed in your lab.
+
+
+5. Send the roll number on CONTROL
+First, convert your roll number into ASCII byte values.
+
+For example, if the roll number is 241CS119, its bytes are:
+[50, 52, 49, 67, 83, 49, 49, 57]
+
+
+In Node A's shell, type:
+phy << new TxFrameReq(
+    to: 20,
+    type: CONTROL,
+    data: [50, 52, 49, 67, 83, 49, 49, 57] as byte[]
+)
+
+
+Expected sender output:
+AGREE
+phy >> TxFrameNtf:INFORM[...]
+
+
+At Node B, expect something similar to:
+phy >> RxFrameNtf:INFORM[type:CONTROL from:10 ...]
+
+
+The received data should contain your roll-number bytes.
+6. Send the roll number on DATA
+In Node A's shell:
+phy << new TxFrameReq(
+    to: 20,
+    type: DATA,
+    data: [50, 52, 49, 67, 83, 49, 49, 57] as byte[]
+)
+
+
+At Node A, expect another TxFrameNtf.
+
+At Node B, expect:
+phy >> RxFrameNtf:INFORM[type:DATA from:10 ...]
+
+
+You should see the same payload.
+
+The TxFrameReq accepts the channel type and byte array, while the receiver reports a successfully decoded frame through RxFrameNtf. 
+UnetStack Handbook+1
+
+7. Calculate transmission duration
+For each channel, use:
+
+T=(frameLength*8) / dataRate
+
+
+Here:
+- frameLength is in bytes.
+- dataRate is in bits per second.
+- T is in seconds.
+You can calculate it directly in Node A's shell:
+
+def controlTime = phy[CONTROL].frameLength * 8 / phy[CONTROL].dataRate
+println "CONTROL transmission time = ${controlTime} seconds"
+
+def dataTime = phy[DATA].frameLength * 8 / phy[DATA].dataRate
+println "DATA transmission time = ${dataTime} seconds"
+
+
+This is the nominal frame duration calculated from the channel parameters.
+8. Prepare your observation table
+Fill it using the actual values displayed by your simulation.
+Parameter	                    CONTROL	    DATA
+Frame length (bytes)	        Your value	Your value
+Data rate (bps)	                Your value	Your value
+Transmission time (seconds)	    Your value	Your value
+Transmission status	            Success	    Success
+Reception status	            Received	Received
+
+9. Screenshots to capture
+
+Screenshot 1 – Node A
+
+Show both TxFrameReq commands, AGREE, TxFrameNtf, and channel parameters.
+
+
+Screenshot 2 – Node B
+
+Show both RxFrameNtf notifications and the received byte data.

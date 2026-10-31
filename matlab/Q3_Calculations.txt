@@ -1,0 +1,22 @@
+<--- Expected calculations --->
+
+Frame transmission time:
+T_t=(1000*8) / (4*10^6)
+=0.002\text{ seconds}=2\text{ ms}
+
+Round-trip propagation time:
+RTT = 2*20
+
+Efficiency:
+2/(2+40)
+
+Effective throughput:
+4*0.047619
+
+<--- Expected comparison table --->
+One-way propagation     delay	    RTT	Efficiency
+5 ms	                10 ms	    16.67%
+10 ms	                20 ms	    9.09%
+20 ms	                40 ms	    4.76%
+40 ms	                80 ms	    2.44%
+80 ms	                160 ms	    1.23%

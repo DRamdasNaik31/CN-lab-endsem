@@ -1,0 +1,168 @@
+Q5 is a multi-hop static routing practical. The important concept is that Node 11 cannot directly reach Node 13, so Node 12 must forward the datagram.
+
+We'll use these positions:
+Node	Address	Position
+Node 11	11	0 m
+Node 12	12	800 m
+Node 13	13	1600 m
+
+Communication range = 1000 m.
+
+So:
+- 11 ↔ 12: reachable
+- 12 ↔ 13: reachable
+- 11 ↔ 13: not directly reachable
+The UnetStack router supports static routes using a destination and next-hop address. We'll configure those routes automatically in the simulation startup script. 
+UnetStack Handbook+1
+
+1. Create the simulation file
+Save it as Q5_Static_Routing.groovy.
+
+We'll use two runs of the same file:
+- enableRoutes = false: demonstrate the failed direct attempt.
+- enableRoutes = true: install static routes at node startup and demonstrate successful forwarding.
+This lets you show the before-and-after result without manually typing route commands into the node shells.
+
+
+
+
+
+2. First run — demonstrate failure without routes
+Make sure the first line says:
+def enableRoutes = false
+
+
+Save the file.
+
+Run:
+bin/unet Q5_Static_Routing.groovy
+
+
+Wait for all three nodes to start.
+
+Open Node 11:
+http://localhost:8081
+
+
+Type:
+router << new DatagramReq(
+    to: 13,
+    protocol: Protocol.USER,
+    data: "HELLO FROM NODE 11".bytes
+)
+
+
+Expected: no delivery
+Node 13 should not receive the datagram because it is 1600 m away from Node 11, beyond the 1000 m communication range. There is no route through Node 12 yet.
+
+Take a screenshot of this attempt.
+
+Stop the simulation using Ctrl+C.
+3. Second run — enable static routes
+Open the same file and change:
+def enableRoutes = false
+
+
+to:
+def enableRoutes = true
+
+
+Save and restart:
+bin/unet Q5_Static_Routing.groovy
+
+
+Wait for all nodes to start and for the route configuration messages to appear.
+4. Display the routing tables
+Open Node 11:
+http://localhost:8081
+
+
+Type:
+routes
+
+
+Expected important entry:
+Destination	Next hop
+13	12
+
+Open Node 13:
+http://localhost:8083
+
+
+Type:
+routes
+
+
+Expected important entry:
+Destination	Next hop
+11	12
+
+Node 12 also has routes to both neighboring nodes and forwarding enabled.
+5. Send a datagram from Node 11 to Node 13
+At Node 11:
+router << new DatagramReq(
+    to: 13,
+    protocol: Protocol.USER,
+    data: "HELLO FROM NODE 11".bytes
+)
+
+
+At Node 13, subscribe to incoming datagrams:
+subscribe topic(Topics.DATAGRAM)
+
+
+Expected received message:
+HELLO FROM NODE 11
+
+
+6. Send a reply from Node 13 to Node 11
+At Node 11, subscribe:
+subscribe topic(Topics.DATAGRAM)
+
+
+At Node 13, send:
+router << new DatagramReq(
+    to: 11,
+    protocol: Protocol.USER,
+    data: "REPLY FROM NODE 13".bytes
+)
+
+
+Expected at Node 11:
+REPLY FROM NODE 13
+
+
+7. Verify the route through Node 12
+At Node 11, type:
+trace 13
+
+
+This asks the routing system to trace the path to Node 13. The expected path is:
+11 → 12 → 13
+
+
+The reverse path is:
+13 → 12 → 11
+
+
+The router's trace command is designed to show the intermediate hops. 
+UnetStack Handbook+1
+
+8. Final observation table
+Test	                        Expected result
+11 → 13 without routes	        Failure
+11 → 13 with static routes	    Success
+13 → 11 with static routes	    Success
+Route from 11 to 13	            Via 12
+Route from 13 to 11	            Via 12
+Trace	                        11 → 12 → 13
+
+9. Screenshots for your record
+1. Failed attempt: Node 11 sending to Node 13 with routes disabled.
+2. Node 11 routing table: Destination 13, next hop 12.
+3. Node 13 routing table: Destination 11, next hop 12.
+4. Successful delivery: Node 13 displaying HELLO FROM NODE 11.
+5. Reply: Node 11 displaying REPLY FROM NODE 13.
+6. Route trace: Showing 11 → 12 → 13.
+
+Important correction for your lab: This script uses the documented EditRouteReq interface for startup route configuration. If your installed UnetStack version reports an error around RouteInfo.CREATE or the route request, send me that exact error before changing anything. The routing table and forwarding behavior must be verified in the actual lab version; don't assume a route was installed just because the script printed its configuration message.

@@ -1,0 +1,95 @@
+3. Run the simulation
+From your UnetStack installation directory:
+bin/unet Q4_Echo_Simulation.groovy
+
+
+Wait for both nodes to start.
+4. Check whether EchoAgent is running on Node 2
+Open Node 2:
+http://localhost:8082
+
+
+In its shell, type:
+ps
+
+
+Look for an entry similar to:
+echo: EchoAgent - RUNNING
+
+
+You can also type:
+echo
+
+
+You should see the agent information.
+5. Subscribe to replies at Node 1
+Open Node 1:
+http://localhost:8081
+
+
+Type:
+subscribe topic(Topics.DATAGRAM)
+
+
+This allows Node 1 to display incoming datagram notifications.
+6. Send three messages from Node 1
+Send these one by one:
+
+Message 1
+phy << new DatagramReq(to: 2, protocol: Protocol.USER, data: "hello bro".bytes)
+
+
+Message 2
+phy << new DatagramReq(to: 2, protocol: Protocol.USER, data: "unetstack practical".bytes)
+
+
+Message 3
+phy << new DatagramReq(to: 2, protocol: Protocol.USER, data: "good morning".bytes)
+
+
+7. Expected output
+At Node 2, the EchoAgent should print messages similar to:
+EchoAgent started and listening...
+
+Received: hello bro
+Replying: HELLO BRO | Received at: Sat Oct 31 ...
+
+Received: unetstack practical
+Replying: UNETSTACK PRACTICAL | Received at: Sat Oct 31 ...
+
+Received: good morning
+Replying: GOOD MORNING | Received at: Sat Oct 31 ...
+
+
+At Node 1, expect received DatagramNtf notifications containing:
+HELLO BRO | Received at: ...
+UNETSTACK PRACTICAL | Received at: ...
+GOOD MORNING | Received at: ...
+
+
+8. Screenshots for your practical record
+Screenshot 1 – EchoAgent running
+
+Node 2 shell showing:
+ps
+echo: EchoAgent - RUNNING
+
+
+
+Screenshot 2 – Node 2
+
+Show the three received lowercase messages and their uppercase replies with reception timestamps.
+
+Screenshot 3 – Node 1
+
+Show the three sent DatagramReq commands and the three received DatagramNtf replies.
+
+9. Expected result table
+Sent by Node 1	        Echoed by Node 2
+hello bro	            HELLO BRO
+unetstack practical	    UNETSTACK PRACTICAL
+good morning	        GOOD MORNING
+
+Important: The reply uses Protocol.DATA, not Protocol.USER. This prevents the echo agent from repeatedly echoing its own replies.
+
+One version-dependent detail: if your lab's UnetStack setup uses a different default stack configuration, the custom stack may need to match that setup. The agent itself follows the documented API.

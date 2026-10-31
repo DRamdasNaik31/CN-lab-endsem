@@ -1,0 +1,4 @@
+change the directory
+
+nano filename.groovy        → creates/opens the file for writing.
+bin/unet filename.groovy    → runs the file using UnetStack.

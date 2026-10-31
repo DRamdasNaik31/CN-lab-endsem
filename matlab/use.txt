@@ -1,0 +1,16 @@
+<--- Create the MATLAB file --->
+
+1. Open MATLAB.
+2. Click New Script (top-left).
+3. Copy the complete code below.
+4. Save the file as <filename.m>
+
+<--- Run the program --->
+After saving:
+1. Make sure Q2_Transmission_Delay.m is open in MATLAB.
+2. Click the green Run button.
+3. Check the Command Window.
+4. A separate graph window should appear.
+
+Alternatively, type this in the Command Window:
+<filename> without the extension

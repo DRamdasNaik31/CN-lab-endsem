@@ -1,0 +1,93 @@
+2. Run the simulation
+Open the terminal inside your UnetStack installation folder:
+bin/unet Q3_Unicast_Broadcast.groovy
+
+
+Wait for all three nodes to start.
+3. Subscribe at Node 2
+Open Node 2's shell:
+http://localhost:8082
+
+
+Enter:
+subscribe topic(Topics.DATAGRAM)
+
+
+4. Subscribe at Node 3
+Open Node 3's shell:
+http://localhost:8083
+
+
+Enter:
+subscribe topic(Topics.DATAGRAM)
+
+
+Both nodes are now listening for incoming datagrams.
+
+The Topics.DATAGRAM topic is where received datagrams addressed to a node, including broadcast datagrams, are published. 
+UnetStack Handbook+1
+
+5. Send UNICAST from Node 1 to Node 3
+Open Node 1's shell:
+http://localhost:8081
+
+
+Enter:
+phy << new DatagramReq(
+    to: 3,
+    protocol: Protocol.USER,
+    data: "HELLO-YOUR_ROLL_NUMBER".bytes
+)
+
+
+Replace YOUR_ROLL_NUMBER with your actual roll number.
+
+For example, if your roll number is 241CS119:
+phy << new DatagramReq(
+    to: 3,
+    protocol: Protocol.USER,
+    data: "HELLO-241CS119".bytes
+)
+
+
+Expected observation:
+- Node 3 receives DatagramNtf.
+- Node 2 should not receive this unicast datagram.
+6. Send BROADCAST from Node 1
+In Node 1's shell, enter:
+phy << new DatagramReq(
+    to: 0,
+    protocol: Protocol.USER,
+    data: "HELLO-241CS119".bytes
+)
+
+
+Here, address 0 represents the broadcast destination. 
+UnetStack Handbook+1
+
+
+Expected observation:
+- Node 2 receives DatagramNtf.
+- Node 3 receives DatagramNtf.
+7. Expected connectivity/observation table
+Transmission	Node 2 receives?	Node 3 receives?
+Unicast 1 → 3	No	Yes
+Broadcast 1 → All	Yes	Yes
+
+8. What to capture for your practical record
+Screenshot 1 – Node 1
+
+Show the two DatagramReq commands and their AGREE responses.
+
+Screenshot 2 – Node 2
+
+Show the broadcast DatagramNtf and decoded text:
+HELLO-241CS119
+
+
+
+Screenshot 3 – Node 3
+
+Show both unicast and broadcast DatagramNtf notifications and decoded message text.
+
+Important: AGREE confirms that the request was accepted, not necessarily that every receiver got it. The DatagramNtf at the receiving nodes is your evidence of delivery

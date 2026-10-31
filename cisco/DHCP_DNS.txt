@@ -1,0 +1,360 @@
+Question 3: DHCP and DNS Server
+Part 1: Create the network topology
+Step 1. Open Cisco Packet Tracer.
+
+Step 2. Add these devices:
+Category	Device	    Quantity
+Routers	    1941	    1
+Switches	2960	    1
+End Devices	Server-PT	2
+End Devices	PC-PT	    3
+
+Step 3. Arrange the devices:
+- Router R1 at the top.
+- Switch SW1 below the router.
+- DHCP/DNS Server on the left.
+- Web Server beside it.
+- PC1, PC2 and PC3 on the right.
+Step 4. Rename the devices.
+
+Click device → Config → Display Name.
+
+Use:
+- Router0 → R1
+- Switch0 → SW1
+- Server0 → DHCP-DNS
+- Server1 → WEB-SERVER
+- PC0 → PC1
+- PC1 → PC2
+- PC2 → PC3
+Part 2: Connect all devices
+Step 5. Click Connections (lightning icon).
+
+Step 6. Select Copper Straight-Through.
+
+Connect the devices as follows:
+From	        Port	To	    Port
+R1	            G0/0	SW1     Fa0/1
+DHCP-DNS	    Fa0	    SW1	    Fa0/2
+WEB-SERVER	    Fa0	    SW1     Fa0/3
+PC1	            Fa0	    SW1	    Fa0/4
+PC2	            Fa0	    SW1	    Fa0/5
+PC3	            Fa0	    SW1	    Fa0/6
+
+Step 7. Wait until the connection indicators turn green.
+
+
+Part 3: Configure router IP address
+Step 8. Click R1 → CLI.
+
+Step 9. Press Enter.
+
+Step 10. Enter these commands:
+enable
+configure terminal
+interface gigabitEthernet 0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+exit
+end
+
+
+Step 11. Verify:
+show ip interface brief
+
+
+Check that G0/0 has:
+IP Address: 192.168.1.1
+Status: up
+Protocol: up
+
+
+Part 4: Configure DHCP/DNS Server static IP
+Step 12. Click DHCP-DNS Server.
+
+Step 13. Open Desktop → IP Configuration.
+
+Step 14. Select Static.
+
+Enter:
+IP Address:       192.168.1.2
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+
+Step 15. Close IP Configuration.
+
+
+Part 5: Configure Web Server static IP
+Step 16. Click WEB-SERVER.
+
+Step 17. Open Desktop → IP Configuration.
+
+Step 18. Select Static.
+
+Enter:
+IP Address:       192.168.1.3
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+
+Step 19. Close IP Configuration.
+Static server addresses configured
+
+
+Part 6: Configure DHCP service
+Step 20. Click DHCP-DNS Server.
+
+Step 21. Open Services tab.
+
+Step 22. Select DHCP from the left-side menu.
+
+Step 23. Change DHCP Service to ON.
+
+Step 24. Configure the DHCP pool with these values:
+Field	Value
+Pool Name	OFFICE
+Default Gateway	192.168.1.1
+DNS Server	192.168.1.2
+Start IP Address	192.168.1.10
+Subnet Mask	255.255.255.0
+Maximum Number of Users	100
+
+Step 25. Click Add (or Save, depending on your Packet Tracer version).
+
+Step 26. Check that OFFICE appears in the pool list.
+DHCP service configured
+
+
+Part 7: Configure DNS service
+Step 27. While inside DHCP-DNS Server, open Services.
+
+Step 28. Select DNS from the left-side menu.
+
+Step 29. Change DNS Service to ON.
+
+Step 30. Add the first DNS record.
+
+Enter:
+Name:    www.company.com
+Address: 192.168.1.3
+
+
+Click Add.
+
+Step 31. Add the second DNS record.
+Name:    ftp.company.com
+Address: 192.168.1.3
+
+
+Click Add.
+
+Step 32. Add the third DNS record.
+Name:    mail.company.com
+Address: 192.168.1.3
+
+
+Click Add.
+
+Step 33. Verify that all three records appear in the DNS records list.
+DNS configured
+The question doesn't provide separate FTP and mail server IP addresses. Since the topology contains only one Web Server, the above configuration maps all three names to 192.168.1.3. This demonstrates DNS resolution; it does not enable FTP or email services.
+
+
+Part 8: Enable HTTP service on Web Server
+Step 34. Click WEB-SERVER.
+
+Step 35. Open Services tab.
+
+Step 36. Select HTTP from the left-side menu.
+
+Step 37. Change HTTP Service to ON.
+
+Step 38. Check that HTTPS is also available, but HTTP is the required service here.
+
+Step 39. Open the index.html file in the HTTP section.
+
+You can replace the default page content with:
+<html>
+<head>
+    <title>Company Website</title>
+</head>
+<body>
+    <h1>Welcome to Company</h1>
+    <p>DHCP and DNS configuration successful!</p>
+</body>
+</html>
+
+
+Step 40. Click Save.
+HTTP service enabled
+Part 9: Configure PCs to obtain IP addresses automatically
+We need all three PCs to obtain their IP addresses through DHCP.
+PC1
+Step 41. Click PC1.
+
+Step 42. Open Desktop → IP Configuration.
+
+Step 43. Select DHCP.
+
+Wait for the DHCP information to appear.
+
+Expected:
+IP Address:       192.168.1.10
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+
+PC2
+Step 44. Click PC2 → Desktop → IP Configuration.
+
+Step 45. Select DHCP.
+
+Expected:
+IP Address:       192.168.1.11
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+
+PC3
+Step 46. Click PC3 → Desktop → IP Configuration.
+
+Step 47. Select DHCP.
+
+Expected:
+IP Address:       192.168.1.12
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+All three PCs received DHCP addresses
+
+
+Part 10: Verify DHCP allocation
+Step 48. Click PC1 → Desktop → Command Prompt.
+
+Step 49. Enter:
+ipconfig /all
+
+
+Step 50. Verify these details:
+- IP address
+- Subnet mask
+- Default gateway
+- DNS server
+Step 51. Repeat on PC2 and PC3.
+
+Step 52. Go to DHCP-DNS Server → Services → DHCP.
+
+Check the pool configuration and available address allocation information.
+
+
+Part 11: Verify DNS resolution
+Step 53. Click PC1 → Desktop → Command Prompt.
+
+Step 54. Enter:
+ping www.company.com
+
+
+Expected:
+Pinging www.company.com [192.168.1.3]
+Reply from 192.168.1.3
+
+
+Step 55. Test FTP domain resolution:
+ping ftp.company.com
+
+
+Expected destination:
+192.168.1.3
+
+
+Step 56. Test mail domain resolution:
+ping mail.company.com
+
+
+Expected destination:
+192.168.1.3
+
+
+Step 57. You can also test DNS using:
+nslookup www.company.com
+
+
+If nslookup is unsupported in your Packet Tracer PC command prompt, use the ping tests above.
+
+
+Part 12: Access website using domain name
+This is one of the most important demonstrations.
+
+Step 58. Click PC1.
+
+Step 59. Open Desktop.
+
+Step 60. Click Web Browser.
+
+Step 61. Enter the following URL:
+http://www.company.com
+
+
+Step 62. Click Go.
+Expected: Company website opens
+
+You should see:
+Welcome to Company
+DHCP and DNS configuration successful!
+
+
+Step 63. Repeat the same test from PC2 and PC3.
+
+Open their Web Browser applications and enter:
+http://www.company.com
+
+
+All three clients should access the website.
+
+
+Part 13: Reserve an IP address for PC1
+Packet Tracer's Server-PT DHCP service generally does not provide a MAC-based DHCP reservation interface like a dedicated DHCP server.
+
+So we'll demonstrate the static IP reservation alternative.
+
+First, complete the DHCP demonstration for all three PCs. Then perform these steps.
+
+Step 64. Click PC1.
+
+Step 65. Open Desktop → IP Configuration.
+
+Step 66. Select Static.
+
+Step 67. Enter:
+IP Address:       192.168.1.200
+Subnet Mask:      255.255.255.0
+Default Gateway:  192.168.1.1
+DNS Server:       192.168.1.2
+
+
+Step 68. Keep this address outside the DHCP pool.
+
+Our DHCP pool starts at .10 and has 100 addresses, ending at .109. So .200 does not conflict with DHCP allocation.
+
+Step 69. Verify PC1:
+
+Open Command Prompt:
+ipconfig
+
+
+Confirm that PC1 has 192.168.1.200.
+
+Step 70. Test website access again:
+
+Open Web Browser:
+http://www.company.com
+
+
+The website should still open.
+Static IP reservation alternative demonstrated

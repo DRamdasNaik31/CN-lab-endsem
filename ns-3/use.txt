@@ -1,0 +1,7 @@
+<--- first go to the folder --->
+
+<--- creating files --->
+nano scratch/<filename.cc>
+
+<--- Run it --->
+./ns3 run scratch/<filename without extension>

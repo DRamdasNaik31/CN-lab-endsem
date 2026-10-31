@@ -1,0 +1,235 @@
+Question 1: Basic LAN using Router, Switch and Hub
+Part 1: Create the topology
+Step 1. Open Cisco Packet Tracer.
+
+Step 2. Add the following devices from the bottom device panel.
+Device category Device to select Quantity
+Routers 1941 (or router with G0/0) 1
+Switches 2960 1
+Hubs Hub-PT 1
+End Devices PC-PT 3
+End Devices Printer-PT 1
+
+Step 3. Place the devices approximately as shown:
+
+- Router R1 at the top.
+- Switch SW1 below the router.
+- PC1 on the left.
+- PC2 below the switch.
+- Hub on the right.
+- PC3 and Printer below/right of the hub.
+
+Step 4. Rename the devices.
+Click each device → Config → Display Name.
+
+Use these names:
+
+- Router0 → R1
+- Switch0 → SW1
+- PC0 → PC1
+- PC1 → PC2
+- PC2 → PC3
+- Printer0 → Printer0
+
+Part 2: Connect all devices
+Step 5. Select the Connections icon (lightning symbol) at the bottom.
+
+Step 6. Select Copper Straight-Through cable.
+
+Connect the following devices:
+From     Port                 To       Port
+R1       GigabitEthernet0/0   SW1      FastEthernet0/1
+SW1      FastEthernet0/2      PC1      FastEthernet0
+SW1      FastEthernet0/3      PC2      FastEthernet0
+SW1      FastEthernet0/4      Hub      Port 1
+Hub      Port 2               PC3      FastEthernet0
+Hub      Port 3               Printer0 FastEthernet0
+
+If your hub displays different port numbers, use any available ports.
+
+Step 7. Wait for the connection indicators to turn green.
+
+Your topology is now connected.
+Part 3: Configure router interface
+Step 8. Click R1 → CLI.
+
+Step 9. Press Enter.
+
+Step 10. Enter these commands one by one:
+enable
+configure terminal
+interface gigabitEthernet 0/0
+ip address 192.168.10.1 255.255.255.0
+no shutdown
+exit
+exit
+
+Step 11. Verify the router configuration.
+
+Enter:
+show ip interface brief
+
+Expected result:
+Interface IP Address Status
+GigabitEthernet0/0 192.168.10.1 up/up
+Router configured
+
+Part 4: Configure static IP addresses
+We need to assign IP addresses to all three PCs and the printer.
+
+Use this addressing table:
+Device   IP address     Subnet mask       Gateway
+R1       192.168.10.1   255.255.255.0      —
+PC1      192.168.10.10  255.255.255.0     192.168.10.1
+PC2      192.168.10.11  255.255.255.0     192.168.10.1
+PC3      192.168.10.12  255.255.255.0     192.168.10.1
+Printer0 192.168.10.13  255.255.255.0     192.168.10.1
+
+Configure PC1
+Step 12. Click PC1.
+
+Step 13. Open Desktop.
+
+Step 14. Click IP Configuration.
+
+Step 15. Select Static.
+
+Step 16. Enter:
+IP Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Configure PC2
+Step 17. Click PC2 → Desktop → IP Configuration → Static.
+
+Enter:
+IP Address: 192.168.10.11
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Configure PC3
+Step 18. Click PC3 → Desktop → IP Configuration → Static.
+
+Enter:
+IP Address: 192.168.10.12
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Configure Printer0
+Step 19. Click Printer0.
+
+Step 20. Open Config.
+
+Step 21. Select FastEthernet0.
+
+Step 22. Select Static IP configuration and enter:
+IP Address: 192.168.10.13
+Subnet Mask: 255.255.255.0
+
+Step 23. Open Settings in the Config tab.
+
+Step 24. Set the default gateway to:
+192.168.10.1
+All IP addresses configured
+
+Part 5: Verify connectivity using Ping
+Step 25. Click PC1.
+
+Step 26. Open Desktop → Command Prompt.
+
+Step 27. Enter:
+ping 192.168.10.11
+
+This tests PC1 → PC2.
+
+Step 28. Test PC1 → PC3:
+ping 192.168.10.12
+
+Step 29. Test PC1 → Printer:
+ping 192.168.10.13
+
+Step 30. Test PC1 → Router:
+ping 192.168.10.1
+
+Expected result:
+Reply from 192.168.10.11
+Reply from 192.168.10.11
+Reply from 192.168.10.11
+Reply from 192.168.10.11
+
+You should receive successful replies. The first ping can occasionally time out while ARP resolution takes place. Repeat it.
+
+Part 6: Observe ARP request and reply packets
+Step 31. At the bottom-right corner, click Simulation instead of Realtime.
+
+Step 32. Click Edit Filters.
+
+Step 33. Click Show None.
+
+Step 34. Select only:
+
+- ARP
+- ICMP
+  Step 35. Close the filter window.
+
+Step 36. Click PC1 → Desktop → Command Prompt.
+
+Step 37. Enter:
+ping 192.168.10.11
+
+Step 38. Click Capture/Forward repeatedly in Simulation Mode.
+
+Step 39. Observe the packet movement.
+
+You should see:
+
+1. PC1 sends an ARP Request.
+2. The switch forwards the request.
+3. PC2 receives the ARP Request.
+4. PC2 sends an ARP Reply.
+5. PC1 receives the ARP Reply.
+6. ICMP Echo Request and Echo Reply packets are exchanged.
+   Step 40. Click the packet envelope in the simulation event list to inspect its details.
+
+Look for:
+
+- ARP Request
+- ARP Reply
+- Source IP address
+- Destination IP address
+- Source MAC address
+- Destination MAC address
+
+Part 7: Demonstrate Switch vs Hub behavior
+This is an important part of your practical demonstration.
+
+Switch
+
+- Learns MAC addresses.
+- Maintains a MAC address table.
+- Forwards known unicast frames to the appropriate port.
+- Unknown unicast and broadcast traffic can be flooded.
+
+Hub
+
+- Does not maintain a MAC address table.
+- Repeats incoming signals to all other ports.
+- Does not selectively forward frames.
+
+Step 41. Demonstrate hub behavior.
+
+1. Switch to Simulation Mode.
+2. Keep ARP and ICMP filters enabled.
+3. From PC3, ping PC1:
+   ping 192.168.10.10
+
+4. Click Capture/Forward.
+5. Observe the packet entering the hub from PC3.
+6. Observe that the hub repeats it to its other connected ports, including the printer and switch.
+   Step 42. Demonstrate switch behavior.
+
+7. From PC1, ping PC2:
+   ping 192.168.10.11
+
+8. Observe the packet entering SW1.
+9. After the switch has learned the destination MAC address, observe that the unicast frame is forwarded through the appropriate port rather than every port.
