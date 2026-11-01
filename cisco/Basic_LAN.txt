@@ -3,12 +3,12 @@ Part 1: Create the topology
 Step 1. Open Cisco Packet Tracer.
 
 Step 2. Add the following devices from the bottom device panel.
-Device category Device to select Quantity
-Routers 1941 (or router with G0/0) 1
-Switches 2960 1
-Hubs Hub-PT 1
-End Devices PC-PT 3
-End Devices Printer-PT 1
+Device category      Device to select              Quantity
+Routers              1941 (or router with G0/0)    1  
+Switches             2960                          1
+Hubs                 Hub-PT                        1
+End Devices          PC-PT                         3
+End Devices          Printer-PT                    1
 
 Step 3. Place the devices approximately as shown:
 
