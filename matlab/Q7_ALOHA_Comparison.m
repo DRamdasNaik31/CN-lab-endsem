@@ -1,200 +1,90 @@
 
-#include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/point-to-point-module.h"
-#include "ns3/applications-module.h"
+clc;
+clear;
+close all;
 
-using namespace ns3;
+% Q7: Pure ALOHA and Slotted ALOHA
 
-int main(int argc, char *argv[])
-{
-    // Simulation time
-    double simulationTime = 10.0;
+%% 1. Generate G values
 
-    // Create four nodes
-    NodeContainer nodes;
-    nodes.Create(4);
+G = 0:0.05:3;
 
-    Ptr<Node> router = nodes.Get(0);
-    Ptr<Node> sender1 = nodes.Get(1);
-    Ptr<Node> sender2 = nodes.Get(2);
-    Ptr<Node> receiver = nodes.Get(3);
+%% 2. Calculate normalized throughput
 
-    // Install Internet stack
-    InternetStackHelper internet;
-    internet.Install(nodes);
+% Pure ALOHA
+S_pure = G .* exp(-2 .* G);
 
-    // Configure point-to-point links
-    PointToPointHelper p2p;
+% Slotted ALOHA
+S_slotted = G .* exp(-G);
 
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
-    p2p.SetChannelAttribute("Delay", StringValue("2ms"));
+%% 3. Find maximum throughput
 
-    // Connect router to sender 1
-    NodeContainer link1(router, sender1);
-    NetDeviceContainer devices1 = p2p.Install(link1);
+[maxPure, indexPure] = max(S_pure);
+G_pure_max = G(indexPure);
 
-    // Connect router to sender 2
-    NodeContainer link2(router, sender2);
-    NetDeviceContainer devices2 = p2p.Install(link2);
+[maxSlotted, indexSlotted] = max(S_slotted);
+G_slotted_max = G(indexSlotted);
 
-    // Connect router to receiver
-    NodeContainer link3(router, receiver);
-    NetDeviceContainer devices3 = p2p.Install(link3);
+fprintf('PURE ALOHA:\n');
+fprintf('Maximum Throughput = %.6f\n', maxPure);
+fprintf('Corresponding G = %.2f\n', G_pure_max);
 
-    // Assign IP addresses
-    Ipv4AddressHelper address;
+fprintf('\nSLOTTED ALOHA:\n');
+fprintf('Maximum Throughput = %.6f\n', maxSlotted);
+fprintf('Corresponding G = %.2f\n', G_slotted_max);
 
-    address.SetBase("10.1.1.0", "255.255.255.0");
-    Ipv4InterfaceContainer interfaces1 =
-        address.Assign(devices1);
+%% 4. Display throughput at selected G values
 
-    address.SetBase("10.1.2.0", "255.255.255.0");
-    Ipv4InterfaceContainer interfaces2 =
-        address.Assign(devices2);
+selectedG = [0.5 1.0 2.0];
 
-    address.SetBase("10.1.3.0", "255.255.255.0");
-    Ipv4InterfaceContainer interfaces3 =
-        address.Assign(devices3);
+pureValues = selectedG .* exp(-2 .* selectedG);
+slottedValues = selectedG .* exp(-selectedG);
 
-    // Enable routing between networks
-    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+Results = table( ...
+    selectedG', ...
+    pureValues', ...
+    slottedValues', ...
+    'VariableNames', ...
+    {'G', 'Pure_ALOHA', 'Slotted_ALOHA'});
 
-    // Application ports
-    uint16_t tcpPort = 5000;
-    uint16_t udpPort = 5001;
+fprintf('\nThroughput Comparison at Selected G Values:\n');
+disp(Results);
 
-    // Install TCP receiver application
-    PacketSinkHelper tcpSinkHelper(
-        "ns3::TcpSocketFactory",
-        InetSocketAddress(Ipv4Address::GetAny(), tcpPort)
-    );
+%% 5. Plot both throughput curves
 
-    ApplicationContainer tcpSinkApps =
-        tcpSinkHelper.Install(receiver);
+figure;
 
-    tcpSinkApps.Start(Seconds(0.5));
-    tcpSinkApps.Stop(Seconds(simulationTime));
+plot(G, S_pure, 'r-', 'LineWidth', 2);
+hold on;
 
-    // Install UDP receiver application
-    PacketSinkHelper udpSinkHelper(
-        "ns3::UdpSocketFactory",
-        InetSocketAddress(Ipv4Address::GetAny(), udpPort)
-    );
+plot(G, S_slotted, 'b-', 'LineWidth', 2);
 
-    ApplicationContainer udpSinkApps =
-        udpSinkHelper.Install(receiver);
+% Mark maximum throughput points
+plot(G_pure_max, maxPure, 'ro', ...
+    'MarkerSize', 8, 'MarkerFaceColor', 'r');
 
-    udpSinkApps.Start(Seconds(0.5));
-    udpSinkApps.Stop(Seconds(simulationTime));
+plot(G_slotted_max, maxSlotted, 'bo', ...
+    'MarkerSize', 8, 'MarkerFaceColor', 'b');
 
-    // Configure TCP sender
-    OnOffHelper tcpSender(
-        "ns3::TcpSocketFactory",
-        InetSocketAddress(interfaces3.GetAddress(1), tcpPort)
-    );
+grid on;
 
-    tcpSender.SetAttribute(
-        "DataRate", StringValue("8Mbps")
-    );
+xlabel('Offered Load (G)');
+ylabel('Normalized Throughput (S)');
 
-    tcpSender.SetAttribute(
-        "PacketSize", UintegerValue(1024)
-    );
+title('Pure ALOHA vs Slotted ALOHA');
 
-    tcpSender.SetAttribute(
-        "OnTime",
-        StringValue("ns3::ConstantRandomVariable[Constant=1]")
-    );
+legend('Pure ALOHA', 'Slotted ALOHA', ...
+       'Pure ALOHA Maximum', 'Slotted ALOHA Maximum', ...
+       'Location', 'best');
 
-    tcpSender.SetAttribute(
-        "OffTime",
-        StringValue("ns3::ConstantRandomVariable[Constant=0]")
-    );
+hold off;
 
-    ApplicationContainer tcpSenderApps =
-        tcpSender.Install(sender1);
+%% 6. Display comparison
 
-    tcpSenderApps.Start(Seconds(1.0));
-    tcpSenderApps.Stop(Seconds(9.0));
+fprintf('\nOBSERVATION:\n');
 
-    // Configure UDP sender
-    OnOffHelper udpSender(
-        "ns3::UdpSocketFactory",
-        InetSocketAddress(interfaces3.GetAddress(1), udpPort)
-    );
+fprintf(['Slotted ALOHA achieves a higher maximum throughput ' ...
+         'than Pure ALOHA.\n']);
 
-    udpSender.SetAttribute(
-        "DataRate", StringValue("8Mbps")
-    );
-
-    udpSender.SetAttribute(
-        "PacketSize", UintegerValue(1024)
-    );
-
-    udpSender.SetAttribute(
-        "OnTime",
-        StringValue("ns3::ConstantRandomVariable[Constant=1]")
-    );
-
-    udpSender.SetAttribute(
-        "OffTime",
-        StringValue("ns3::ConstantRandomVariable[Constant=0]")
-    );
-
-    ApplicationContainer udpSenderApps =
-        udpSender.Install(sender2);
-
-    udpSenderApps.Start(Seconds(1.0));
-    udpSenderApps.Stop(Seconds(9.0));
-
-    // Run simulation
-    Simulator::Stop(Seconds(simulationTime));
-
-    Simulator::Run();
-
-    // Get received bytes
-    Ptr<PacketSink> tcpSink =
-        DynamicCast<PacketSink>(tcpSinkApps.Get(0));
-
-    Ptr<PacketSink> udpSink =
-        DynamicCast<PacketSink>(udpSinkApps.Get(0));
-
-    uint64_t tcpBytes = tcpSink->GetTotalRx();
-    uint64_t udpBytes = udpSink->GetTotalRx();
-
-    // Calculate throughput
-    double duration = 8.0;
-
-    double tcpThroughput =
-        (tcpBytes * 8.0) / (duration * 1000000.0);
-
-    double udpThroughput =
-        (udpBytes * 8.0) / (duration * 1000000.0);
-
-    // Display results
-    std::cout << "\n===== STAR NETWORK RESULTS =====\n";
-
-    std::cout << "\nTCP FLOW:\n";
-    std::cout << "Bytes received = "
-              << tcpBytes << " bytes\n";
-
-    std::cout << "Throughput = "
-              << tcpThroughput << " Mbps\n";
-
-    std::cout << "\nUDP FLOW:\n";
-    std::cout << "Bytes received = "
-              << udpBytes << " bytes\n";
-
-    std::cout << "Throughput = "
-              << udpThroughput << " Mbps\n";
-
-    std::cout << "\n================================\n";
-
-    Simulator::Destroy();
-
-    return 0;
-}
-
-// Thorughput = (Received Bytes*8)/Simulation Duration
+fprintf(['Slotted ALOHA has a maximum throughput of 1/e, ' ...
+         'while Pure ALOHA has a maximum throughput of 1/(2e).\n']);
